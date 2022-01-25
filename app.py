@@ -5,22 +5,36 @@ import requests
 import csv
 import json
 
-response = requests.get("http://api.nbp.pl/api/exchangerates/tables/C?format=json")
-data = response.json()
-
-with open('rates.csv', 'w', encoding='utf-8') as csvfile:
-    csvwriter = csv.writer(csvfile, delimiter=';')
-    csvwriter.writerow(data[0]['rates'][0].keys())
-    for rate in data[0]["rates"]:
-        csvwriter.writerow(rate.values())
+def getdata():
+    response = requests.get("http://api.nbp.pl/api/exchangerates/tables/C?format=json")
+    data = response.json()
+    with open('rates.csv', 'w', encoding='utf-8') as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=';')
+        csvwriter.writerow(data[0]['rates'][0].keys())
+        for rate in data[0]["rates"]:
+            csvwriter.writerow(rate.values())
+    
+#def get_code_list():
+#    response = requests.get("http://api.nbp.pl/api/exchangerates/tables/C?format=json")
+#    data = response.json()
+#    code_list = []
+#    for rate in data[0]["rates"]:
+#        code_list.append(rate['code'])
 
 app = Flask(__name__)
 
 @app.route('/kantor', methods=['GET', 'POST'])
 def kantor():
+    getdata()
+    response = requests.get("http://api.nbp.pl/api/exchangerates/tables/C?format=json")
+    data = response.json()
+    code_list = []
+    for rate in data[0]["rates"]:
+        code_list.append(rate['code'])
+        myData=code_list
     if request.method == 'GET':
         print("GET")
-        return render_template("kantor.html")
+        return render_template("kantor.html", myData=myData)
     elif request.method == 'POST':
         print("POST")
         data = request.form
@@ -33,4 +47,4 @@ def kantor():
                     bid = float(row["bid"])
                     result = float(value)*bid
                     results = [f"{result}"]
-                    return render_template("kantor.html", results = results)
+                    return render_template("kantor.html", results = results, myData=myData)

@@ -9,22 +9,12 @@
         <form method="POST">
             <label for="currency">Wybierz walutę:</label>
             <select name="code" id="code">
-                <option value="USD">USD</option>
-                <option value="AUD">AUD</option>
-                <option value="CAD">CAD</option>
-                <option value="EUR">EUR</option>
-                <option value="HUF">HUF</option>
-                <option value="CHF">CHF</option>
-                <option value="GBP">GBP</option>
-                <option value="JPY">JPY</option>
-                <option value="CZK">CZK</option>
-                <option value="DKK">DKK</option>
-                <option value="NOK">NOK</option>
-                <option value="SEK">SEK</option>
-                <option value="XDR">XDR</option>
+                {% for value in myData %}
+                <option>{{ value }}</option>
+                <var>value</var> 
+                {% endfor %}
             </select>
             <br><br>
-        
         
             <p>Wpisz kwotę waluty do przeliczenia na PLN:</p>
             <label for="value">Podaj kwotę:</label>
