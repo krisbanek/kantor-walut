@@ -5,7 +5,7 @@ import requests
 import csv
 import json
 
-def getdata():
+def getdata_csvwriter():
     response = requests.get("http://api.nbp.pl/api/exchangerates/tables/C?format=json")
     data = response.json()
     with open('rates.csv', 'w', encoding='utf-8') as csvfile:
@@ -13,38 +13,34 @@ def getdata():
         csvwriter.writerow(data[0]['rates'][0].keys())
         for rate in data[0]["rates"]:
             csvwriter.writerow(rate.values())
-    
-#def get_code_list():
-#    response = requests.get("http://api.nbp.pl/api/exchangerates/tables/C?format=json")
-#    data = response.json()
-#    code_list = []
-#    for rate in data[0]["rates"]:
-#        code_list.append(rate['code'])
+
+def getdata():
+    response = requests.get("http://api.nbp.pl/api/exchangerates/tables/C?format=json")
+    data = response.json()
+    return data
+
 
 app = Flask(__name__)
 
 @app.route('/kantor', methods=['GET', 'POST'])
 def kantor():
-    getdata()
+    #getdata_csvwriter()              #Avaiable on request.
     response = requests.get("http://api.nbp.pl/api/exchangerates/tables/C?format=json")
     data = response.json()
     code_list = []
     for rate in data[0]["rates"]:
         code_list.append(rate['code'])
-        myData=code_list
     if request.method == 'GET':
         print("GET")
-        return render_template("kantor.html", myData=myData)
+        return render_template("kantor.html", myData=code_list)
     elif request.method == 'POST':
         print("POST")
-        data = request.form
-        code = data.get('code')
-        value = data.get('value')
-        with open('rates.csv', 'r', encoding='utf-8') as csvfile:
-            csvreader = csv.DictReader(csvfile, delimiter=';')
-            for row in csvreader:
-                if code == row["code"]:
-                    bid = float(row["bid"])
-                    result = float(value)*bid
-                    results = [f"{result}"]
-                    return render_template("kantor.html", results = results, myData=myData)
+        data_html = request.form
+        code = data_html.get('code')
+        value = data_html.get('value')
+        for rate in data[0]["rates"]:
+            if code == rate['code']:
+                result = float(value)*float(rate['bid'])
+                results = [f"{result}"]
+                return render_template("kantor.html", results = results, myData=code_list)
+        
